@@ -2,7 +2,7 @@ cd(@__DIR__)
 using Pkg
 Pkg.activate("./OPEN_GL/")
 
-import GLFW
+using GLFW
 using ModernGL
 
 # settings

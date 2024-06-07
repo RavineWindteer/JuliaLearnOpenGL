@@ -17,21 +17,26 @@ const SCR_HEIGHT = 600
 
 const vertexShaderSource = """
     #version 330 core
-    layout (location = 0) in vec3 aPos;
+    layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0
+    layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
+    
+    out vec3 ourColor; // output a color to the fragment shader
 
     void main()
     {
-        gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        gl_Position = vec4(aPos, 1.0);
+        ourColor = aColor; // set ourColor to the input color we got from the vertex data
     }
     """
 
 const fragmentShaderSource = """
     #version 330 core
     out vec4 FragColor;
-
+    in vec3 ourColor;
+    
     void main()
     {
-        FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+        FragColor = vec4(ourColor, 1.0);
     }
     """
 
@@ -100,9 +105,10 @@ function main()
     # set up vertex data (and buffer(s)) and configure vertex attributes
     # ------------------------------------------------------------------
     vertecies = GLfloat[
-        -0.5f0, -0.5f0, 0.0f0, # left
-        0.5f0, -0.5f0, 0.0f0, # right
-        0.0f0, 0.5f0, 0.0f0] # top
+        # positions             # colors
+        -0.5f0, -0.5f0, 0.0f0,  1.0f0, 0.0f0, 0.0f0, # left
+        0.5f0, -0.5f0, 0.0f0,   0.0f0, 1.0f0, 0.0f0, # right
+        0.0f0, 0.5f0, 0.0f0,    0.0f0, 0.0f0, 1.0f0] # top
     
     VBO = GLuint[0]
     VAO = GLuint[0]
@@ -114,8 +120,12 @@ function main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO[])
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertecies), vertecies, GL_STATIC_DRAW)
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), Ptr{Cvoid}(0))
+    # position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), Ptr{Cvoid}(0))
     glEnableVertexAttribArray(0)
+    # color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), Ptr{Cvoid}(3 * sizeof(GLfloat)))
+    glEnableVertexAttribArray(1)
 
     # note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0)
@@ -126,6 +136,9 @@ function main()
 
     # uncomment this call to draw in wireframe polygons.
     #glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+
+    # as we only have a single shader, we could also just activate our shader once beforehand if we want to 
+    glUseProgram(shaderProgram)
 
     # render loop
     # -----------
@@ -139,11 +152,9 @@ function main()
         glClearColor(0.2f0, 0.3f0, 0.3f0, 1.0f0)
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # draw our first triangle
-        glUseProgram(shaderProgram)
-        glBindVertexArray(VAO[]) # seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        # render the triangle
+        glBindVertexArray(VAO[])
         glDrawArrays(GL_TRIANGLES, 0, 3)
-        #glBindVertexArray(0) # no need to unbind it every time
 
         # glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         # -------------------------------------------------------------------------------
@@ -151,6 +162,14 @@ function main()
         GLFW.PollEvents()
     end
 
+    # optional: de-allocate all resources once they've outlived their purpose:
+    # ------------------------------------------------------------------------
+    glDeleteVertexArrays(1, VAO)
+    glDeleteBuffers(1, VBO)
+    glDeleteProgram(shaderProgram)
+
+    # glfw: terminate, clearing all previously allocated GLFW resources.
+    # ------------------------------------------------------------------
     GLFW.Terminate()
 end
 

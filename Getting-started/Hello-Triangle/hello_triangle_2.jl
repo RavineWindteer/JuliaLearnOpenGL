@@ -2,14 +2,13 @@ cd(@__DIR__)
 using Pkg
 Pkg.activate("./OPEN_GL/")
 
-import GLFW
+using GLFW
 using ModernGL
 
 # for passing strings to OpenGL functions that expect pointers to GLchar
 # ----------------------------------------------------------------------
-macro glchar_ptr(source)
-    :(convert(Ptr{UInt8}, pointer([convert(Ptr{GLchar}, pointer($source))])))
-end
+glchar_ptr(source) =
+    convert(Ptr{UInt8}, pointer([convert(Ptr{GLchar}, pointer(source))]))
 
 
 # settings
@@ -63,24 +62,24 @@ function main()
     # ------------------------------------
     # vertex shader
     vertexShader = glCreateShader(GL_VERTEX_SHADER)
-    glShaderSource(vertexShader, 1, @glchar_ptr(vertexShaderSource), C_NULL)
+    glShaderSource(vertexShader, 1, glchar_ptr(vertexShaderSource), C_NULL)
     glCompileShader(vertexShader)
     # check for shader compile errors
     success = GLint[0]
     infoLog = zeros(GLchar, 512)
     sizei = GLsizei[0]
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, success)
-    if success[] == 0
+    if success[] == GL_FALSE
         glGetShaderInfoLog(vertexShader, 512, sizei, infoLog)
         println("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n", unsafe_string(pointer(infoLog), sizei[]))
     end
     # fragment shader
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
-    glShaderSource(fragmentShader, 1, @glchar_ptr(fragmentShaderSource), C_NULL)
+    glShaderSource(fragmentShader, 1, glchar_ptr(fragmentShaderSource), C_NULL)
     glCompileShader(fragmentShader)
     # check for shader compile errors
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, success)
-    if success[] == 0
+    if success[] == GL_FALSE
         glGetShaderInfoLog(fragmentShader, 512, sizei, infoLog)
         println("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n", unsafe_string(pointer(infoLog), sizei[]))
     end
@@ -91,7 +90,7 @@ function main()
     glLinkProgram(shaderProgram)
     # check for linking errors
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, success)
-    if success[] == 0
+    if success[] == GL_FALSE
         glGetProgramInfoLog(shaderProgram, 512, sizei, infoLog)
         println("ERROR::SHADER::PROGRAM::LINKING_FAILED\n", unsafe_string(pointer(infoLog), sizei[]))
     end

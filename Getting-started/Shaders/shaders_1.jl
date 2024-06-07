@@ -17,21 +17,23 @@ const SCR_HEIGHT = 600
 
 const vertexShaderSource = """
     #version 330 core
-    layout (location = 0) in vec3 aPos;
+    layout (location = 0) in vec3 aPos; // the position variable has attribute position 0
 
     void main()
     {
-        gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        gl_Position = vec4(aPos, 1.0); // see how we directly give a vec3 to vec4's constructor
     }
     """
 
 const fragmentShaderSource = """
     #version 330 core
     out vec4 FragColor;
+    
+    uniform vec4 ourColor; // we set this variable in the OpenGL code.
 
     void main()
     {
-        FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+        FragColor = ourColor;
     }
     """
 
@@ -139,11 +141,18 @@ function main()
         glClearColor(0.2f0, 0.3f0, 0.3f0, 1.0f0)
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # draw our first triangle
+        # be sure to activate the shader before any calls to glUniform
         glUseProgram(shaderProgram)
-        glBindVertexArray(VAO[]) # seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+
+        # update shader uniform
+        timeValue = time()
+        greenValue = (sin(timeValue) / 2.0f0) + 0.5f0
+        vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor")
+        glUniform4f(vertexColorLocation, 0.0f0, greenValue, 0.0f0, 1.0f0)
+
+        # render the triangle
+        glBindVertexArray(VAO[])
         glDrawArrays(GL_TRIANGLES, 0, 3)
-        #glBindVertexArray(0) # no need to unbind it every time
 
         # glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         # -------------------------------------------------------------------------------
@@ -151,6 +160,14 @@ function main()
         GLFW.PollEvents()
     end
 
+    # optional: de-allocate all resources once they've outlived their purpose:
+    # ------------------------------------------------------------------------
+    glDeleteVertexArrays(1, VAO)
+    glDeleteBuffers(1, VBO)
+    glDeleteProgram(shaderProgram)
+
+    # glfw: terminate, clearing all previously allocated GLFW resources.
+    # ------------------------------------------------------------------
     GLFW.Terminate()
 end
 
