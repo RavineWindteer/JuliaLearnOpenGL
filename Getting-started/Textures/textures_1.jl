@@ -40,7 +40,7 @@ function main()
 
     # build and compile our shader program
     # ------------------------------------
-    ourShader = Shader("4.1.shader.vs", "4.1.shader.fs") # you can name your shader files however you like
+    ourShader = Shader("./shaders/4.1.shader.vs", "./shaders/4.1.shader.fs") # you can name your shader files however you like
 
     # set up vertex data (and buffer(s)) and configure vertex attributes
     # ------------------------------------------------------------------
@@ -97,7 +97,7 @@ function main()
     height = GLint[0]
     nrChannels = GLint[0]
     # There isn't yet a wraper for stbi_load, load_img! is a custom function that uses JpegTurbo.jl to load the image in the right format
-    data = load_img!("container.jpg", width, height, nrChannels)
+    data = load_img!("./textures/container.jpg", width, height, nrChannels)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width[], height[], 0, GL_RGB, GL_UNSIGNED_BYTE, pointer(data))
     glGenerateMipmap(GL_TEXTURE_2D)
 

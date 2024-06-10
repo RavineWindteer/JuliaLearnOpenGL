@@ -37,7 +37,7 @@ function main()
 
     # build and compile our shader program
     # ------------------------------------
-    ourShader = Shader("3.3.shader.vs", "3.3.shader.fs") # you can name your shader files however you like
+    ourShader = Shader("./shaders/3.3.shader.vs", "./shaders/3.3.shader.fs") # you can name your shader files however you like
 
     # set up vertex data (and buffer(s)) and configure vertex attributes
     # ------------------------------------------------------------------

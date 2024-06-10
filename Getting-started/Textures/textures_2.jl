@@ -40,7 +40,7 @@ function main()
 
     # build and compile our shader program
     # ------------------------------------
-    ourShader = Shader("4.2.shader.vs", "4.2.shader.fs") # you can name your shader files however you like
+    ourShader = Shader("./shaders/4.2.shader.vs", "./shaders/4.2.shader.fs") # you can name your shader files however you like
 
     # set up vertex data (and buffer(s)) and configure vertex attributes
     # ------------------------------------------------------------------
@@ -100,7 +100,7 @@ function main()
     height = GLint[0]
     nrChannels = GLint[0]
     # load_img! is a custom function that loads the image in the right format
-    data = load_img!("container.jpg", width, height, nrChannels)
+    data = load_img!("./textures/container.jpg", width, height, nrChannels)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width[], height[], 0, GL_RGB, GL_UNSIGNED_BYTE, pointer(data))
     glGenerateMipmap(GL_TEXTURE_2D)
     # texture 2
@@ -114,7 +114,7 @@ function main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     # load image, create texture and generate mipmaps
-    data = load_img!("awesomeface.png", width, height, nrChannels)
+    data = load_img!("./textures/awesomeface.png", width, height, nrChannels)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width[], height[], 0, GL_RGBA, GL_UNSIGNED_BYTE, pointer(data))
     glGenerateMipmap(GL_TEXTURE_2D)
 
