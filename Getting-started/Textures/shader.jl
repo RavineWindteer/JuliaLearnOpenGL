@@ -6,6 +6,17 @@ using ModernGL
 glchar_ptr(source) =
     convert(Ptr{UInt8}, pointer([convert(Ptr{GLchar}, pointer(source))]))
 
+# utility function for converting a Julia string to a C string
+# ------------------------------------------------------------
+function cstring(s::String)
+    c_string = Vector{UInt8}(s)
+    push!(c_string, 0)
+end
+
+# utility function to get the pointer of a c style string
+# -------------------------------------------------------
+c_str_ptr(s::Vector{UInt8}) = convert(Ptr{UInt8}, pointer(s))
+
 # utility function for checking shader compilation/linking errors.
 # ------------------------------------------------------------------------
 function checkCompileErrors(shader::GLuint, type::String)
@@ -86,10 +97,27 @@ struct Shader
 end
 
 use(shader::Shader) = glUseProgram(shader.ID)
-setBool(shader::Shader, name::String, value::Bool) =
-    glUniform1i(glGetUniformLocation(shader.ID, glchar_ptr(name)), GLint(value))
-setInt(shader::Shader, name::String, value::GLint) =
-    glUniform1i(glGetUniformLocation(shader.ID, glchar_ptr(name)), value)
-setFloat(shader::Shader, name::String, value::GLfloat) =
-    glUniform1f(glGetUniformLocation(shader.ID, glchar_ptr(name)), value)
+
+function setBool(shader::Shader, name::String, value::Bool)
+    c_name = cstring(name)
+    ptr_c_name = c_str_ptr(c_name)
+    glUniform1i(glGetUniformLocation(shader.ID, ptr_c_name), GLint(value))
+end
+
+function setInt(shader::Shader, name::String, value::GLint)
+    c_name = cstring(name)
+    ptr_c_name = c_str_ptr(c_name)
+    glUniform1i(glGetUniformLocation(shader.ID, ptr_c_name), value)
+end
+setInt(shader::Shader, name::String, value::Real) =
+    setInt(shader, name, GLint(value))
+
+function setFloat(shader::Shader, name::String, value::GLfloat)
+    c_name = cstring(name)
+    ptr_c_name = c_str_ptr(c_name)
+    glUniform1f(glGetUniformLocation(shader.ID, ptr_c_name), value)
+end
+setFloat(shader::Shader, name::String, value::Real) =
+    setFloat(shader, name, GLfloat(value))
+
 delete(shader::Shader) = glDeleteProgram(shader.ID)

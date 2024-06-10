@@ -40,7 +40,7 @@ function main()
 
     # build and compile our shader program
     # ------------------------------------
-    ourShader = Shader("4.1.shader.vs", "4.1.shader.fs") # you can name your shader files however you like
+    ourShader = Shader("4.2.shader.vs", "4.2.shader.fs") # you can name your shader files however you like
 
     # set up vertex data (and buffer(s)) and configure vertex attributes
     # ------------------------------------------------------------------
@@ -83,23 +83,50 @@ function main()
 
     # load and create a texture
     # -------------------------
-    texture = GLuint[0]
-    glGenTextures(1, texture)
-    glBindTexture(GL_TEXTURE_2D, texture[]) # all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    texture1 = GLuint[0]
+    texture2 = GLuint[0]
+    # texture 1
+    # ---------
+    glGenTextures(1, texture1)
+    glBindTexture(GL_TEXTURE_2D, texture1[])
     # set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)	# set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
     # set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     # load image, create texture and generate mipmaps
     width = GLint[0]
     height = GLint[0]
     nrChannels = GLint[0]
-    # There isn't yet a wraper for stbi_load, load_img! is a custom function that uses JpegTurbo.jl to load the image in the right format
+    # load_img! is a custom function that loads the image in the right format
     data = load_img!("container.jpg", width, height, nrChannels)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width[], height[], 0, GL_RGB, GL_UNSIGNED_BYTE, pointer(data))
     glGenerateMipmap(GL_TEXTURE_2D)
+    # texture 2
+    # ---------
+    glGenTextures(1, texture2)
+    glBindTexture(GL_TEXTURE_2D, texture2[])
+    # set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)	# set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+    # set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    # load image, create texture and generate mipmaps
+    data = load_img!("awesomeface.png", width, height, nrChannels)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width[], height[], 0, GL_RGBA, GL_UNSIGNED_BYTE, pointer(data))
+    glGenerateMipmap(GL_TEXTURE_2D)
+
+    # tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    # -------------------------------------------------------------------------------------------
+    use(ourShader)
+    # either set it manually like so:
+    c_name = cstring("texture1") # create null terminated c style string
+    ptr_c_name = c_str_ptr(c_name) # get the pointer to the c style string
+    glUniform1i(glGetUniformLocation(ourShader.ID, ptr_c_name), 0)
+    # or set it via the texture struct
+    setInt(ourShader, "texture2", 1)
 
 
     # render loop
@@ -114,10 +141,13 @@ function main()
         glClearColor(0.2f0, 0.3f0, 0.3f0, 1.0f0)
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # bind Texture
-        glBindTexture(GL_TEXTURE_2D, texture[])
+        # bind textures on corresponding texture units
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, texture1[])
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, texture2[])
 
-        # render the triangle
+        # render container
         use(ourShader)
         glBindVertexArray(VAO[])
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Ptr{Cvoid}(0))
@@ -132,6 +162,7 @@ function main()
     # ------------------------------------------------------------------------
     glDeleteVertexArrays(1, VAO)
     glDeleteBuffers(1, VBO)
+    glDeleteBuffers(1, EBO)
     delete(ourShader)
 
     # glfw: terminate, clearing all previously allocated GLFW resources.
