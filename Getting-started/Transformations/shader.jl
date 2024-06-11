@@ -148,14 +148,14 @@ setVec4(shader::Shader, name::String, x::Real, y::Real, z::Real, w::Real) =
 
 setMat2(shader::Shader, name::String, value::Mat2) =
     glUniformMatrix2fv(getUniformLocation(shader, name),
-        1, GL_FALSE, collect(value.mat))
+        1, GL_FALSE, value.mat)
 
 setMat3(shader::Shader, name::String, value::Mat3) =
     glUniformMatrix3fv(getUniformLocation(shader, name),
-        1, GL_FALSE, collect(value.mat))
+        1, GL_FALSE, value.mat)
 
 setMat4(shader::Shader, name::String, value::Mat4) =
     glUniformMatrix4fv(getUniformLocation(shader, name),
-        1, GL_FALSE, collect(value.mat))
+        1, GL_FALSE, value.mat)
 
 delete(shader::Shader) = glDeleteProgram(shader.ID)

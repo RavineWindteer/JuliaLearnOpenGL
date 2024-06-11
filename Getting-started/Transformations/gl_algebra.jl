@@ -1,8 +1,3 @@
-cd(@__DIR__)
-using Pkg
-Pkg.activate("./OPEN_GL/")
-
-
 # Vectors
 # =======
 
@@ -144,10 +139,15 @@ cross(v1::Vec3,v2::Vec3) =
 # Matrices
 # ========
 
+# Attention! 
+# -> The matrices are stored in column-major order;
+# -> Creating a matrix from an array will not perform any assertions on the
+# array's size for efficiency. Prefer using the tuple constructors for safety.
+
 # Mat2 type
 # ---------
 struct Mat2
-    mat::NTuple{4, Float32}
+    mat::Array{Float32}
     Mat2() = new([
         0f0, 0f0,
         0f0, 0f0])
@@ -155,81 +155,76 @@ struct Mat2
         a, 0f0,
         0f0, a])
     Mat2(a::Real) = Mat2(Float32(a))
-    Mat2(m::NTuple{4, Float32}) = new(m)
-    Mat2(v1::NTuple{2, Float32}, v2::NTuple{2, Float32}) = new((v1..., v2...))
+    Mat2(m::Array{Float32}) = new(m)
+    Mat2(m::NTuple{4, Float32}) = new(collect(m))
     Mat2(v1::Vec2, v2::Vec2) = 
-        new((
+        new([
             v1.x, v1.y,
-            v2.x, v2.y))
+            v2.x, v2.y])
 end
 
 # Mat3 type
 # ---------
 struct Mat3
-    mat::NTuple{9, Float32}
-    Mat3() = new((
+    mat::Array{Float32}
+    Mat3() = new([
         0f0, 0f0, 0f0,
         0f0, 0f0, 0f0,
-        0f0, 0f0, 0f0))
-    Mat3(a::Float32) = new((
+        0f0, 0f0, 0f0])
+    Mat3(a::Float32) = new([
         a, 0f0, 0f0,
         0f0, a, 0f0,
-        0f0, 0f0, a))
+        0f0, 0f0, a])
     Mat3(a::Real) = Mat3(Float32(a))
-    Mat3(m::NTuple{9, Float32}) = new(m)
-    Mat3(v1::NTuple{3, Float32},
-        v2::NTuple{3, Float32},
-        v3::NTuple{3, Float32}) = new((v1..., v2..., v3...))
+    Mat3(m::Array{Float32}) = new(m)
+    Mat3(m::NTuple{9, Float32}) = new(collect(m))
     Mat3(v1::Vec3, v2::Vec3, v3::Vec3) =
-        new((
+        new([
             v1.x, v1.y, v1.z,
             v2.x, v2.y, v2.z,
-            v3.x, v3.y, v3.z))
+            v3.x, v3.y, v3.z])
 end
 
 # Mat4 type
 # ---------
 struct Mat4
-    mat::NTuple{16, Float32}
-    Mat4() = new((
+    mat::Array{Float32}
+    Mat4() = new([
         0f0, 0f0, 0f0, 0f0,
         0f0, 0f0, 0f0, 0f0,
         0f0, 0f0, 0f0, 0f0,
-        0f0, 0f0, 0f0, 0f0))
-    Mat4(a::Float32) = new((
+        0f0, 0f0, 0f0, 0f0])
+    Mat4(a::Float32) = new([
         a, 0f0, 0f0, 0f0,
         0f0, a, 0f0, 0f0,
         0f0, 0f0, a, 0f0,
-        0f0, 0f0, 0f0, a))
+        0f0, 0f0, 0f0, a])
     Mat4(a::Real) = Mat4(Float32(a))
-    Mat4(m::NTuple{16, Float32}) = new(m)
-    Mat4(v1::NTuple{4, Float32},
-        v2::NTuple{4, Float32},
-        v3::NTuple{4, Float32},
-        v4::NTuple{4, Float32}) = new((v1..., v2..., v3..., v4...))
+    Mat4(m::Array{Float32}) = new(m)
+    Mat4(m::NTuple{16, Float32}) = new(collect(m))
     Mat4(v1::Vec4, v2::Vec4, v3::Vec4, v4::Vec4) =
-        new((
+        new([
             v1.x, v1.y, v1.z, v1.w,
             v2.x, v2.y, v2.z, v2.w,
             v3.x, v3.y, v3.z, v3.w,
-            v4.x, v4.y, v4.z, v4.w))
+            v4.x, v4.y, v4.z, v4.w])
 end
 
 # Print overloads
 # ---------------
 Base.show(io::IO, m::Mat2) =
-    print(io,
+    @inbounds print(io,
     "Mat2(\n[", m.mat[1], ", ", m.mat[3],
     "]\n[", m.mat[2], ", ", m.mat[4], "])\n")
 
 Base.show(io::IO, m::Mat3) =
-    print(io,
+    @inbounds print(io,
     "Mat3(\n[", m.mat[1], ", ", m.mat[4], ", ", m.mat[7],
     "]\n[", m.mat[2], ", ", m.mat[5], ", ", m.mat[8],
     "]\n[", m.mat[3], ", ", m.mat[6], ", ", m.mat[9], "])\n")
 
 Base.show(io::IO, m::Mat4) =
-    print(io,
+    @inbounds print(io,
     "Mat4(\n[", m.mat[1], ", ", m.mat[5], ", ", m.mat[9], ", ", m.mat[13],
     "]\n[", m.mat[2], ", ", m.mat[6], ", ", m.mat[10], ", ", m.mat[14],
     "]\n[", m.mat[3], ", ", m.mat[7], ", ", m.mat[11], ", ", m.mat[15],
@@ -239,10 +234,10 @@ Base.show(io::IO, m::Mat4) =
 # -----------------------
 Base.:+(m1::Mat2, m2::Mat2) = Mat2(m1.mat .+ m2.mat)
 Base.:-(m1::Mat2, m2::Mat2) = Mat2(m1.mat .- m2.mat)
-Base.:+(m1::Mat3, m2::Mat3) = Mat2(m1.mat .+ m2.mat)
-Base.:-(m1::Mat3, m2::Mat3) = Mat2(m1.mat .- m2.mat)
-Base.:+(m1::Mat4, m2::Mat4) = Mat2(m1.mat .+ m2.mat)
-Base.:-(m1::Mat4, m2::Mat4) = Mat2(m1.mat .- m2.mat)
+Base.:+(m1::Mat3, m2::Mat3) = Mat3(m1.mat .+ m2.mat)
+Base.:-(m1::Mat3, m2::Mat3) = Mat3(m1.mat .- m2.mat)
+Base.:+(m1::Mat4, m2::Mat4) = Mat4(m1.mat .+ m2.mat)
+Base.:-(m1::Mat4, m2::Mat4) = Mat4(m1.mat .- m2.mat)
 
 # Matrix-scalar products
 # ----------------------
@@ -258,13 +253,13 @@ Base.:*(a::Real, m::Mat4) = m * a
 
 # Matrix-matrix multiplication
 # ----------------------------
-Base.:*(m1::Mat2, m2::Mat2) = Mat2((
+Base.:*(m1::Mat2, m2::Mat2) = @inbounds Mat2([
     m1.mat[1] * m2.mat[1] + m1.mat[3] * m2.mat[2],
     m1.mat[2] * m2.mat[1] + m1.mat[4] * m2.mat[2],
     m1.mat[1] * m2.mat[3] + m1.mat[3] * m2.mat[4],
-    m1.mat[2] * m2.mat[3] + m1.mat[4] * m2.mat[4]))
+    m1.mat[2] * m2.mat[3] + m1.mat[4] * m2.mat[4]])
 
-Base.:*(m1::Mat3, m2::Mat3) = Mat3((
+Base.:*(m1::Mat3, m2::Mat3) = @inbounds Mat3([
     m1.mat[1] * m2.mat[1] + m1.mat[4] * m2.mat[2] + m1.mat[7] * m2.mat[3],
     m1.mat[2] * m2.mat[1] + m1.mat[5] * m2.mat[2] + m1.mat[8] * m2.mat[3],
     m1.mat[3] * m2.mat[1] + m1.mat[6] * m2.mat[2] + m1.mat[9] * m2.mat[3],
@@ -273,9 +268,9 @@ Base.:*(m1::Mat3, m2::Mat3) = Mat3((
     m1.mat[3] * m2.mat[4] + m1.mat[6] * m2.mat[5] + m1.mat[9] * m2.mat[6],
     m1.mat[1] * m2.mat[7] + m1.mat[4] * m2.mat[8] + m1.mat[7] * m2.mat[9],
     m1.mat[2] * m2.mat[7] + m1.mat[5] * m2.mat[8] + m1.mat[8] * m2.mat[9],
-    m1.mat[3] * m2.mat[7] + m1.mat[6] * m2.mat[8] + m1.mat[9] * m2.mat[9]))
+    m1.mat[3] * m2.mat[7] + m1.mat[6] * m2.mat[8] + m1.mat[9] * m2.mat[9]])
 
-Base.:*(m1::Mat4, m2::Mat4) = Mat4((
+Base.:*(m1::Mat4, m2::Mat4) = @inbounds Mat4([
     m1.mat[1] * m2.mat[1] + m1.mat[5] * m2.mat[2] + m1.mat[9] * m2.mat[3] + m1.mat[13] * m2.mat[4],
     m1.mat[2] * m2.mat[1] + m1.mat[6] * m2.mat[2] + m1.mat[10] * m2.mat[3] + m1.mat[14] * m2.mat[4],
     m1.mat[3] * m2.mat[1] + m1.mat[7] * m2.mat[2] + m1.mat[11] * m2.mat[3] + m1.mat[15] * m2.mat[4],
@@ -291,7 +286,7 @@ Base.:*(m1::Mat4, m2::Mat4) = Mat4((
     m1.mat[1] * m2.mat[13] + m1.mat[5] * m2.mat[14] + m1.mat[9] * m2.mat[15] + m1.mat[13] * m2.mat[16],
     m1.mat[2] * m2.mat[13] + m1.mat[6] * m2.mat[14] + m1.mat[10] * m2.mat[15] + m1.mat[14] * m2.mat[16],
     m1.mat[3] * m2.mat[13] + m1.mat[7] * m2.mat[14] + m1.mat[11] * m2.mat[15] + m1.mat[15] * m2.mat[16],
-    m1.mat[4] * m2.mat[13] + m1.mat[8] * m2.mat[14] + m1.mat[12] * m2.mat[15] + m1.mat[16] * m2.mat[16]))
+    m1.mat[4] * m2.mat[13] + m1.mat[8] * m2.mat[14] + m1.mat[12] * m2.mat[15] + m1.mat[16] * m2.mat[16]])
 
 #Base.:⊙(m1::Mat2, m2::Mat2) = Mat2(m1.mat .* m2.mat)
 #Base.:⊙(m1::Mat3, m2::Mat3) = Mat3(m1.mat .* m2.mat)
@@ -299,16 +294,16 @@ Base.:*(m1::Mat4, m2::Mat4) = Mat4((
 
 # Matrix-Vector multiplication
 # ----------------------------
-Base.:*(m::Mat2, v::Vec2) = Vec2(
+Base.:*(m::Mat2, v::Vec2) = @inbounds Vec2(
     m.mat[1] * v.x + m.mat[3] * v.y,
     m.mat[2] * v.x + m.mat[4] * v.y)
 
-Base.:*(m::Mat3, v::Vec3) = Vec3(
+Base.:*(m::Mat3, v::Vec3) = @inbounds Vec3(
     m.mat[1] * v.x + m.mat[4] * v.y + m.mat[7] * v.z,
     m.mat[2] * v.x + m.mat[5] * v.y + m.mat[8] * v.z,
     m.mat[3] * v.x + m.mat[6] * v.y + m.mat[9] * v.z)
 
-Base.:*(m::Mat4, v::Vec4) = Vec4(
+Base.:*(m::Mat4, v::Vec4) = @inbounds Vec4(
     m.mat[1] * v.x + m.mat[5] * v.y + m.mat[9] * v.z + m.mat[13] * v.w,
     m.mat[2] * v.x + m.mat[6] * v.y + m.mat[10] * v.z + m.mat[14] * v.w,
     m.mat[3] * v.x + m.mat[7] * v.y + m.mat[11] * v.z + m.mat[15] * v.w,
@@ -317,32 +312,32 @@ Base.:*(m::Mat4, v::Vec4) = Vec4(
 # Scaling
 # -------
 scale(m::Mat3, v::Vec2) =
-    Mat3((
+    @inbounds Mat3([
         m.mat[1] * v.x, m.mat[2], m.mat[3],
         m.mat[4], m.mat[5] * v.y, m.mat[6],
-        m.mat[7], m.mat[8], m.mat[9]))
+        m.mat[7], m.mat[8], m.mat[9]])
 
 scale(m::Mat4, v::Vec3) =
-    Mat4((
+    @inbounds Mat4([
         m.mat[1] * v.x, m.mat[2], m.mat[3], m.mat[4],
         m.mat[5], m.mat[6] * v.y, m.mat[7], m.mat[8],
         m.mat[9], m.mat[10], m.mat[11] * v.z, m.mat[12],
-        m.mat[13], m.mat[14], m.mat[15], m.mat[16]))
+        m.mat[13], m.mat[14], m.mat[15], m.mat[16]])
 
 # Translation
 # -----------
 translate(m::Mat3, v::Vec2) =
-    Mat3((
+    @inbounds Mat3([
         m.mat[1], m.mat[2], m.mat[3],
         m.mat[4], m.mat[5], m.mat[6],
-        m.mat[7] + v.x, m.mat[8] + v.y, m.mat[9]))
+        m.mat[7] + v.x, m.mat[8] + v.y, m.mat[9]])
 
 translate(m::Mat4, v::Vec3) =
-    Mat4((
+    @inbounds Mat4([
         m.mat[1], m.mat[2], m.mat[3], m.mat[4],
         m.mat[5], m.mat[6], m.mat[7], m.mat[8],
         m.mat[9], m.mat[10], m.mat[11], m.mat[12],
-        m.mat[13] + v.x, m.mat[14] + v.y, m.mat[15] + v.z, m.mat[16]))
+        m.mat[13] + v.x, m.mat[14] + v.y, m.mat[15] + v.z, m.mat[16]])
 
 # Rotation
 # --------
@@ -352,21 +347,21 @@ degrees(θ::Float32) = rad2deg(θ)
 degrees(θ::Real) = degrees(Float32(θ))
 
 rotate(m::Mat3, angle::Float32) =
-    m * Mat3((
+    @inbounds m * Mat3([
         cos(angle), sin(angle), 0f0,
         -sin(angle), cos(angle), 0f0,
-        0f0, 0f0, 1f0))
+        0f0, 0f0, 1f0])
 
 rotate(m::Mat3, angle::Real) = rotate(m, Float32(angle))
 
 function rotate(m::Mat4, θ::Float32, v::Vec3)
     s = sin(θ)
     c = cos(θ)
-    m * Mat4((
+    @inbounds m * Mat4([
         c + v.x*v.x*(1-c), v.y*v.x*(1-c) + v.z*s, v.z*v.x*(1-c) - v.y*s, 0f0,
         v.x*v.y*(1-c) - v.z*s, c + v.y*v.y*(1-c), v.z*v.y*(1-c) + v.x*s, 0f0,
         v.x*v.z*(1-c) + v.y*s, v.y*v.z*(1-c) - v.x*s, c + v.z*v.z*(1-c), 0f0,
-        0f0, 0f0, 0f0, 1f0))
+        0f0, 0f0, 0f0, 1f0])
 end
 
 rotate(m::Mat4, θ::Real, v::Vec3) = rotate(m, Float32(θ), v)
