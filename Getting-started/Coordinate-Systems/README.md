@@ -4,3 +4,7 @@ Julia implementation of the C++ code from the [Coordinate Systems](https://learn
 Result from [coordinate_systems_1.jl](coordinate_systems_1.jl):
 
 ![coordinate_systems_1.jl](readme/Coordinate-Systems_1.png)
+
+Result from [coordinate_systems_2.jl](coordinate_systems_2.jl):
+
+![coordinate_systems_2.jl](readme/Coordinate-Systems_2.png)

@@ -380,3 +380,17 @@ end
 
 perspective(fov::Real, aspect::Real, near::Real, far::Real) =
     perspective(Float32(fov), Float32(aspect), Float32(near), Float32(far))
+
+# Orthographic projection
+# -----------------------
+function ortho(left::Float32, right::Float32, bottom::Float32, top::Float32, near::Float32, far::Float32)
+    @inbounds Mat4([
+        2f0 / (right - left), 0f0, 0f0, 0f0,
+        0f0, 2f0 / (top - bottom), 0f0, 0f0,
+        0f0, 0f0, -2f0 / (far - near), 0f0,
+        (right + left) / (left - right), (top + bottom) / (bottom - top), (far + near) / (near - far), 1f0])
+end
+
+ortho(left::Real, right::Real, bottom::Real, top::Real, near::Real, far::Real) =
+    ortho(Float32(left), Float32(right), Float32(bottom), Float32(top),
+        Float32(near), Float32(far))
