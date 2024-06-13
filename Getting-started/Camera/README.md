@@ -4,3 +4,7 @@ Julia implementation of the C++ code from the [Camera](https://learnopengl.com/G
 Result from [camera_1.jl](camera_1.jl):
 
 ![camera_1.jl](readme/Camera_1.png)
+
+Result from [camera_2.jl](camera_2.jl):
+
+![camera_2.jl](readme/Camera_2.png)
