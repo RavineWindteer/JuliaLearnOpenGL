@@ -8,3 +8,7 @@ Result from [camera_1.jl](camera_1.jl):
 Result from [camera_2.jl](camera_2.jl):
 
 ![camera_2.jl](readme/Camera_2.png)
+
+Result from [camera_3.jl](camera_3.jl):
+
+![camera_3.jl](readme/Camera_3.png)
