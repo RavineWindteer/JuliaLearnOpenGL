@@ -12,3 +12,7 @@ Result from [camera_2.jl](camera_2.jl):
 Result from [camera_3.jl](camera_3.jl):
 
 ![camera_3.jl](readme/Camera_3.png)
+
+Result from [camera_4.jl](camera_4.jl):
+
+![camera_4.jl](readme/Camera_4.png)
