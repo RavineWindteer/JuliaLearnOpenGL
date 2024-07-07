@@ -1,10 +1,6 @@
 # Basic Lighting
-Julia implementation of the C++ code from the [Basic Lighting](https://learnopengl.com/Lighting/Basic-Lighting) chapter.
+Julia implementation of the C++ code from the [Materials](https://learnopengl.com/Lighting/Materials) chapter.
 
-Result from [basic_lightning_1.jl](basic_lightning_1.jl):
+Result from [materials_1.jl](materials_1.jl):
 
-![basic_lightning_1.jl](readme/Basic_Lightning_1.png)
-
-Result from [basic_lightning_2.jl](basic_lightning_2.jl):
-
-![basic_lightning_2.jl](readme/Basic_Lightning_2.png)
+![materials_1.jl](readme/Materials_1.png)

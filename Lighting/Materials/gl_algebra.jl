@@ -135,6 +135,17 @@ cross(v1::Vec3,v2::Vec3) =
         v1.z * v2.x - v1.x * v2.z,
         v1.x * v2.y - v1.y * v2.x)
 
+# Element-wise multiplication and division
+# ----------------------------------------
+Base.:*(v1::Vec2,v2::Vec2) = Vec2(v1.x * v2.x, v1.y * v2.y)
+Base.:*(v1::Vec3,v2::Vec3) = Vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z)
+Base.:*(v1::Vec4,v2::Vec4) =
+    Vec4(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w * v2.w)
+Base.:/(v1::Vec2,v2::Vec2) = Vec2(v1.x / v2.x, v1.y / v2.y)
+Base.:/(v1::Vec3,v2::Vec3) = Vec3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z)
+Base.:/(v1::Vec4,v2::Vec4) =
+    Vec4(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z, v1.w / v2.w)
+
 
 # Matrices
 # ========

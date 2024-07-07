@@ -29,6 +29,8 @@ firstMouse = true
 # timing
 deltaTime = 0.0f0
 lastFrame = 0.0f0
+startTime = 0.0f0
+currentTime = 0.0f0
 
 # lighting
 lightPos = Vec3(1.2f0, 1.0f0, 2.0f0)
@@ -66,7 +68,7 @@ function main()
 
     # build and compile our shader program
     # ------------------------------------
-    lightingShader = Shader("./shaders/3.1.colors.vs", "./shaders/3.1.colors.fs")
+    lightingShader = Shader("./shaders/3.1.materials.vs", "./shaders/3.1.materials.fs")
     lightCubeShader = Shader("./shaders/3.1.light_cube.vs", "./shaders/3.1.light_cube.fs")
 
     # set up vertex data (and buffer(s)) and configure vertex attributes
@@ -147,16 +149,17 @@ function main()
 
     # set initial time of the last frame
     # ----------------------------------
-    lastFrame = time()
+    global startTime = time()
+    global lastFrame = 0.0
 
     # render loop
     # -----------
     while !GLFW.WindowShouldClose(window)
         # per-frame time logic
         # --------------------
-        currentFrame = time()
-        global deltaTime = currentFrame - lastFrame
-        global lastFrame = currentFrame
+        global currentTime = time() - startTime
+        global deltaTime = currentTime - lastFrame
+        global lastFrame = currentTime
 
         # input
         # -----
@@ -169,16 +172,22 @@ function main()
 
         # be sure to activate shader when setting uniforms/drawing objects
         use(lightingShader)
+        setVec3(lightingShader, "light.position", lightPos)
+        setVec3(lightingShader, "viewPos", camera.Position)
+
+        # light properties
+        lightColor = Vec3(sin(currentTime * 2.0), sin(currentTime * 0.7), sin(currentTime * 1.3))
+        diffuseColor = lightColor * Vec3(0.5f0) # decrease the influence
+        ambientColor = diffuseColor * Vec3(0.2f0) # low influence
+        setVec3(lightingShader, "light.ambient",  ambientColor)
+        setVec3(lightingShader, "light.diffuse",  diffuseColor) # darken diffuse light a bit
+        setVec3(lightingShader, "light.specular", 1.0f0, 1.0f0, 1.0f0)
+
+        # material properties
         setVec3(lightingShader, "material.ambient", 1.0f0, 0.5f0, 0.31f0)
         setVec3(lightingShader, "material.diffuse", 1.0f0, 0.5f0, 0.31f0)
-        setVec3(lightingShader, "material.specular", 0.5f0, 0.5f0, 0.5f0)
+        setVec3(lightingShader, "material.specular", 0.5f0, 0.5f0, 0.5f0) # specular lighting doesn't have full effect on this object's material
         setFloat(lightingShader, "material.shininess", 32.0f0)
-        setVec3(lightingShader, "light.position", lightPos)
-        setVec3(lightingShader, "light.ambient",  0.2f0, 0.2f0, 0.2f0)
-        setVec3(lightingShader, "light.diffuse",  0.5f0, 0.5f0, 0.5f0) # darken diffuse light a bit
-        setVec3(lightingShader, "light.specular", 1.0f0, 1.0f0, 1.0f0)
-        setVec3(lightingShader, "objectColor", 1.0f0, 0.5f0, 0.31f0)
-        setVec3(lightingShader, "viewPos", camera.Position)
 
         # view/projection transformations
         projection = perspective(radians(camera.Zoom), 
